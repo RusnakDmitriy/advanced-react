@@ -1,4 +1,4 @@
-import  firebase from 'firebase';
+import firebase from 'firebase';
 import {appName} from '../config';
 import {Record} from 'immutable';
 import {all, take, call, put, cps, takeEvery} from 'redux-saga/effects';
@@ -28,6 +28,7 @@ export default function reducer(state = new ReducerRecord(), action) {
         case SIGN_IN_REQUEST:
             return state.set('loading', true)
 
+        case SIGN_UP_SUCCESS:
         case SIGN_IN_SUCCESS:
             return state
                 .set('loading', false)

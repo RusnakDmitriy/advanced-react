@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {reduxForm, Field} from 'redux-form';
 
-class SignInFrom extends Component {
+class SignInForm extends Component {
     render() {
         const {handleSubmit} = this.props;
         return (
@@ -27,4 +27,4 @@ class SignInFrom extends Component {
 
 export default reduxForm({
     form: 'auth'
-})(SignInFrom);
+})(SignInForm);

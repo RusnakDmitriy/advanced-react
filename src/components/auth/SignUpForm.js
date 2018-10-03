@@ -3,7 +3,7 @@ import {reduxForm, Field} from 'redux-form';
 import emailValidator from 'email-validator';
 import ErrorField from '../common/ErrorField';
 
-class SignUpFrom extends Component {
+class SignUpForm extends Component {
     render() {
         const {handleSubmit} = this.props;
         return (
@@ -35,4 +35,4 @@ const validate = ({email, password}) => {
 export default reduxForm({
     form: 'auth',
     validate
-})(SignUpFrom);
+})(SignUpForm);
