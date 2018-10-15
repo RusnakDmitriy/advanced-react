@@ -64,7 +64,7 @@ class EventList extends Component {
         return this.props.events[index];
     }
 
-    handleRowClick = (rowData) => {
+    handleRowClick = ({rowData}) => {
         const {selectEvent} = this.props;
         selectEvent && selectEvent(rowData.uid)
     }
