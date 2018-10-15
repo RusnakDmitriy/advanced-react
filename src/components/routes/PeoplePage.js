@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import {connect} from 'react-redux';
 import NewPersonForm from '../people/NewPersonForm';
 import PeopleTable from '../people/PeopleTable';
-import {addPerson, getPerson} from '../../ducks/people';
+import {addPerson, getPerson, moduleName} from '../../ducks/people';
+import Loader from '../common/Loader';
 
 class PeoplePage extends Component {
     componentDidMount(){
@@ -10,15 +11,20 @@ class PeoplePage extends Component {
     }
 
     render() {
-        const{addPerson} = this.props;
+        const{addPerson, loading} = this.props;
         return (
             <div>
                 <h2>Add new person</h2>
-                <NewPersonForm onSubmit={addPerson} />
                 <PeopleTable />
+                {loading
+                    ? <Loader />
+                    : <NewPersonForm onSubmit={addPerson} />
+                }
             </div>
         );
     }
 }
 
-export default connect(null, {addPerson, getPerson})(PeoplePage);
+export default connect(state => ({
+    loading:state[moduleName].loading
+}), {addPerson, getPerson})(PeoplePage);

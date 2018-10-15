@@ -12,7 +12,6 @@ class PeopleTable extends Component {
 
     render() {
         const {loading, people} = this.props;
-        if(loading) return <Loader />
         return (
             <Table
                 rowCount={people.length}

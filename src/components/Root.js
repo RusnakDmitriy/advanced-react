@@ -10,7 +10,7 @@ import {moduleName, signOut} from '../ducks/auth';
 
 class Root extends Component {
     render() {
-        const {signOut, signedIn} = this.props;
+        const {signOut, signedIn} = this.props;console.log(this.props.data)
         const btn = signedIn
             ? <button onClick={signOut}>sign out</button>
             : <Link to="/auth/signin">sign in</Link>
@@ -27,5 +27,6 @@ class Root extends Component {
 }
 
 export default connect(state => ({
-    signedIn: !!state[moduleName].user
+    signedIn: !!state[moduleName].user,
+    data: state[moduleName].user && state[moduleName].user.createdAt
 }), {signOut})(Root);
