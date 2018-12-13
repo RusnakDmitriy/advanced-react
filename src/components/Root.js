@@ -7,16 +7,23 @@ import EventsPage from './routes/EventsPage';
 import ProtectedRoute from './common/ProtectedRoute';
 import {connect} from 'react-redux';
 import {moduleName, signOut} from '../ducks/auth';
+import CustomDragLayer from './CustomDragLayer';
 
 class Root extends Component {
     render() {
-        const {signOut, signedIn} = this.props;console.log(this.props.data)
+        const {signOut, signedIn} = this.props;
         const btn = signedIn
             ? <button onClick={signOut}>sign out</button>
             : <Link to="/auth/signin">sign in</Link>
         return (
             <div>
                 {btn}
+                <ul>
+                    <li><Link to="/admin">admin</Link></li>
+                    <li><Link to="/people">people</Link></li>
+                    <li><Link to="/events">events</Link></li>
+                </ul>
+                <CustomDragLayer />
                 <ProtectedRoute path="/admin" component={AdminPage} />
                 <Route path="/auth" component={AuthPage} />
                 <Route path="/people" component={PeoplePage} />

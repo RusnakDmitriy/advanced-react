@@ -1,6 +1,7 @@
 import {appName} from '../config';
 import {Record, OrderedMap} from 'immutable';
-import {put, takeEvery, take, call, all, select} from 'redux-saga/effects';
+import {put, takeEvery, take, call, all, select, fork, spawn, cancel, cancelled, race} from 'redux-saga/effects';
+import {delay, eventChannel} from 'redux-saga';
 import {reset} from 'redux-form';
 import {createSelector} from 'reselect';
 import {generateId, fbDatatoEntities} from './utils';
@@ -59,9 +60,11 @@ export default function reducer(state=new ReducerState(), action){
 
 export const stateSelector = state => state[moduleName];
 export const entitiesSelector = createSelector(stateSelector, state => state.entities);
+export const idSelector = (_, props) => props.uid;
 export const peopleListSelector = createSelector(entitiesSelector, entities => (
     entities.valueSeq().toArray()
 ));
+export const personSelector = createSelector(entitiesSelector, idSelector, (entities, id) => entities.get(id));
 
 export function addPerson(person) {
     return {
@@ -109,25 +112,20 @@ export const addPersonSaga = function * (action) {
 }
 
 export const getPersonSaga = function * () {
+    const ref = firebase.database().ref('people');
 
-    while(true) {
-        const ref = firebase.database().ref('people');
+    try {
+        const data = yield call([ref, ref.once], 'value');
 
-        yield take(GET_PERSON_REQUEST);
-
-        try {
-            const data = yield call([ref, ref.once], 'value');
-
-            yield put({
-                type: GET_PERSON_SUCCESS,
-                payload: data.val()
-            })
-        } catch (error) {
-            yield put({
-                type: GET_PERSON_ERROR,
-                error
-            })
-        }
+        yield put({
+            type: GET_PERSON_SUCCESS,
+            payload: data.val()
+        })
+    } catch (error) {
+        yield put({
+            type: GET_PERSON_ERROR,
+            error
+        })
     }
 }
 
@@ -150,10 +148,75 @@ export const addEventSaga = function * (action) {
     }
 }
 
+export const backgroundSyncSaga = function* (){
+    try{
+        while(true){
+            yield call(getPersonSaga)
+            yield delay(2000)
+        }
+    } finally{
+        if(yield cancelled()) {
+            console.log('-------', 'cancelled sync saga')
+        }
+    }
+
+}
+
+export const cancellableSync = function* (){
+    let task;
+    while(true) {
+        const {payload} = yield take('@@router/LOCATION_CHANGE');
+
+        if(payload && payload.pathname.includes('people')){
+            task = yield fork(realtimeSync);
+            // yield race({
+            //     sync: realtimeSync(),
+            //     delay: delay(6000)
+            // })
+        } else if(task){
+            yield cancel(task);
+        }
+    }
+
+    /*const task = yield fork(backgroundSyncSaga);
+    yield delay(6000);
+    yield cancel(task);*/
+}
+
+const createPeopleSocket = () => eventChannel(emit => {
+    const ref=firebase.database().ref('people');
+    const callback = (data) => emit({data});
+    ref.on('value', callback);
+
+    return () => {
+        console.log('-----', 'unsubscribing')
+        ref.off('value', callback);
+    }
+})
+
+export const realtimeSync = function* (){
+    const chan = yield call(createPeopleSocket);
+    try {
+        while (true) {
+            const {data} = yield take(chan);
+
+            yield put({
+                type: GET_PERSON_SUCCESS,
+                payload: data.val()
+            });
+        }
+    } finally{
+        yield call([chan, chan.close]);
+        console.log('-------', 'cancelled realtime saga');
+    }
+}
+
 export const saga = function * () {
+    yield spawn(cancellableSync)
+    // yield spawn(realtimeSync)
     yield all([
         takeEvery(ADD_PERSON_REQUEST, addPersonSaga),
-        getPersonSaga(),
+        takeEvery(GET_PERSON_REQUEST, getPersonSaga),
         takeEvery(ADD_EVENT_REQUEST, addEventSaga)
     ])
 }

@@ -13,11 +13,11 @@ class App extends Component {
   render() {
     return (
       <Provider store={store}>
-        <ConnectedRouter history={history}>
-            <DragDropContextProvider backend={HTML5Backend}>
-                <Root />
-            </DragDropContextProvider>
-        </ConnectedRouter>
+          <DragDropContextProvider backend={HTML5Backend}>
+              <ConnectedRouter history={history}>
+                  <Root />
+              </ConnectedRouter>
+          </DragDropContextProvider>
       </Provider>
     );
   }
