@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {DragSource} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
+import {TransitionMotion, spring} from 'react-motion';
 
 class PersonCard extends Component {
     componentDidMount(){
@@ -12,6 +13,7 @@ class PersonCard extends Component {
         const draggStyle = {
             backgroundColor: isDragging ? 'grey' : 'white'
         }
+
         return(
             <div style={{width: 200, height: 100, ...draggStyle, ...style}}>
                 {connectDragSource(<h3>{person.firstName}&nbsp;{person.lastName}</h3>)}
