@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {DropTarget} from 'react-dnd';
 import {connect} from 'react-redux';
+import {Motion, spring, presets} from 'react-motion';
 import {deleteEventFromList} from '../../ducks/events';
 
 class Trash extends Component {
@@ -17,11 +18,16 @@ class Trash extends Component {
             backgroundColor: hovered ? 'green' : 'white'
         };
 
-        return (
-            connectDropTarget(<div style={trashStyle}>
-                TRASH
-            </div>)
-        );
+        return <Motion
+            defaultStyle={{opacity: 0}}
+            style={{opacity: spring(1, {...presets.noWobble, stiffness: presets.noWobble.stiffness/20})}}
+        >
+            {interpolatedStyle => connectDropTarget(
+                <div style={{...trashStyle, ...interpolatedStyle}}>
+                    TRASH
+                </div>
+            )}
+        </Motion>
     }
 }
 
